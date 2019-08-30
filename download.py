@@ -63,18 +63,25 @@ print("*** Starting parsing url {}...".format(args.url))
 soup = BeautifulSoup(r.content, 'html.parser')
 rawUrls = soup.find_all("link", attrs={"itemprop": "contentUrl"})
 rawDescriptions = soup.find_all("meta", attrs={"itemprop": "description"})
-urls = [tag.get('href') for tag in rawUrls][:3]
+urls = [tag.get('href') for tag in rawUrls]
 descriptions = [tag.get('content') for tag in rawDescriptions]
 
 print("Retrieved {} files.".format(len(urls)))
 
-for i in range(len(urls)):
-    file = urls[i]
-    file_index = '{:0>{}}. '.format(i + 1, len(str(len(urls))) + 1)
-    local_file_name = os.path.join(args.out, file_index + descriptions[i] + ".mp4")
+if len(urls) > 0:
+    file_dir = os.path.join(args.out, args.url.split("/")[-1])
+    print("Creating directory: " + file_dir)
+    os.mkdir(file_dir)
 
-    print("Status: {}/{} {:.2f}%".format(i, len(urls), i / len(urls)), end='. ')
-    print("Start downloading file %s to %s " % (file, local_file_name))
-    urllib.request.urlretrieve(file, local_file_name)
+    for i in range(len(urls)):
+        file = urls[i]
+        file_index = '{:0>{}}. '.format(i + 1, len(str(len(urls))) + 1)
+
+        local_file_name = os.path.join(file_dir, file_index + descriptions[i] + ".mp4")
+
+        print("Status: {}/{} {:.2f}%".format(i, len(urls), i / len(urls)), end='. ')
+        print("Start downloading file %s to %s " % (file, local_file_name))
+        urllib.request.urlretrieve(file, local_file_name)
+
 
 print("Finished!!! Total downloads: %s" % len(urls))
